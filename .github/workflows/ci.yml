@@ -18,9 +18,15 @@ jobs:
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
-      - run: dotnet restore
-      - run: dotnet build --no-restore
-      - run: dotnet test Service_CRUD/Service_CRUD.csproj --no-build --verbosity normal || true
+
+      - name: Restore CRUD
+        run: dotnet restore Service_CRUD/Service_CRUD.csproj
+
+      - name: Build CRUD
+        run: dotnet build Service_CRUD/Service_CRUD.csproj --no-restore --configuration Release
+
+      - name: Test CRUD (optional)
+        run: dotnet test Service_CRUD/Service_CRUD.csproj --no-build --verbosity normal || true
 
   build-and-test-urlshorten:
     runs-on: ubuntu-latest
@@ -29,9 +35,15 @@ jobs:
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
-      - run: dotnet restore
-      - run: dotnet build --no-restore
-      - run: dotnet test Service_URL_Shorten/Service_URL_Shorten.csproj --no-build --verbosity normal || true
+
+      - name: Restore URL Shorten
+        run: dotnet restore Service_URL_Shorten/Service_URL_Shorten.csproj
+
+      - name: Build URL Shorten
+        run: dotnet build Service_URL_Shorten/Service_URL_Shorten.csproj --no-restore --configuration Release
+
+      - name: Test URL Shorten (optional)
+        run: dotnet test Service_URL_Shorten/Service_URL_Shorten.csproj --no-build --verbosity normal || true
 
   build-gateway:
     runs-on: ubuntu-latest
@@ -40,8 +52,12 @@ jobs:
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
-      - run: dotnet restore
-      - run: dotnet build Service_API_Gateway/Service_API_Gateway.csproj --no-restore
+
+      - name: Restore API Gateway
+        run: dotnet restore Service_API_Gateway/Service_API_Gateway.csproj
+
+      - name: Build API Gateway
+        run: dotnet build Service_API_Gateway/Service_API_Gateway.csproj --no-restore --configuration Release
 
   cd-push-docker:
     runs-on: ubuntu-latest
@@ -54,17 +70,23 @@ jobs:
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
-      - uses: docker/build-push-action@v5
+
+      - name: Build & Push CRUD Image
+        uses: docker/build-push-action@v5
         with:
           context: ./Service_CRUD
           push: true
           tags: ${{ env.DOCKER_REPOSITORY }}:crud-${{ github.sha }}
-      - uses: docker/build-push-action@v5
+
+      - name: Build & Push URL Shorten Image
+        uses: docker/build-push-action@v5
         with:
           context: ./Service_URL_Shorten
           push: true
           tags: ${{ env.DOCKER_REPOSITORY }}:urlshorten-${{ github.sha }}
-      - uses: docker/build-push-action@v5
+
+      - name: Build & Push API Gateway Image
+        uses: docker/build-push-action@v5
         with:
           context: ./Service_API_Gateway
           push: true
