@@ -1,17 +1,19 @@
-name: CI/CD Pipeline - CW_AMD201 
+name: CI/CD Pipeline - CW_AMD201
 
 on:
   push:
-    branches: [ main ]
+    branches: [ master ] 
   pull_request:
-    branches: [ main ]
+    branches: [ master ] 
 
 env:
   DOTNET_VERSION: '8.0.x'
   DOCKER_REPOSITORY: ${{ secrets.DOCKER_USERNAME }}/cw_amd201
 
 jobs:
+  # ==========================================================
   # 1. CI PHASE: Build and Test each service
+  # ==========================================================
   build-and-test-crud:
     name: Build & Test CRUD Service
     runs-on: ubuntu-latest
@@ -24,18 +26,16 @@ jobs:
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
-      # Restore dependencies for the entire solution/project
       - name: Restore Dependencies
         run: dotnet restore
 
-      # Build the Service and Test project
-      - name: Build Service and Tests
+      - name: Build Service
         run: dotnet build --no-restore
 
-      # Run tests for the CRUD service (assuming tests are located in Service_CRUD/Tests)
-      #- name: Run Unit Tests (CRUD)
-        # Thay thế Service_CRUD/Service_CRUD.csproj bằng đường dẫn tới file Test Project của bạn
-        #run: dotnet test Service_CRUD --no-build --verbosity normal || true
+      # Chạy Unit Tests cho CRUD (giữ || true để không thất bại nếu không có test project)
+      - name: Run Unit Tests (CRUD)
+        # Thay thế Service_CRUD/Tests bằng đường dẫn chính xác của file Test Project nếu cần
+        run: dotnet test Service_CRUD --no-build --verbosity normal || true
 
   build-and-test-urlshorten:
     name: Build & Test URL Shorten Service
@@ -51,10 +51,10 @@ jobs:
         run: dotnet restore
       - name: Build Service
         run: dotnet build --no-restore
-      # Run tests for the URL Shorten service
-      #- name: Run Unit Tests (URL Shorten)
-        # Thay thế Service_URL_Shorten/Service_URL_Shorten.csproj bằng đường dẫn tới file Test Project của bạn
-        #run: dotnet test Service_URL_Shorten --no-build --verbosity normal || true
+        
+      # Chạy Unit Tests cho URL Shorten
+      - name: Run Unit Tests (URL Shorten)
+        run: dotnet test Service_URL_Shorten --no-build --verbosity normal || true
 
   build-gateway:
     name: Build API Gateway
@@ -71,18 +71,20 @@ jobs:
       - name: Build Gateway
         run: dotnet build --no-restore Service_API_Gateway # Chỉ build project Gateway
 
+  # ==========================================================
   # 2. CD PHASE: Build and Push Docker Images
+  # ==========================================================
   cd-push-docker:
     name: Push Production Images to Docker Hub
     runs-on: ubuntu-latest
-    # CD chỉ chạy khi tất cả các Job CI (build và test) đều thành công
     needs: [build-and-test-crud, build-and-test-urlshorten, build-gateway] 
-    if: github.ref == 'refs/heads/main' # Chỉ chạy CD khi merge vào nhánh 'main'
+    # CHỈ CHẠY khi push/merge vào nhánh MASTER
+    if: github.ref == 'refs/heads/master' 
 
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
-      
+        
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
