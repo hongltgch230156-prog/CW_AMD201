@@ -1,0 +1,27 @@
+[
+  {
+    "Name": "New Profile",
+    "Projects": [
+      {
+        "Path": "Service_URL_Shorten\\Service_URL_Shorten.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "Service_CRUD\\Service_CRUD.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "Service_Identity\\Service_Identity.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "Service_API_Gateway\\Service_API_Gateway.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "docker-compose.dcproj",
+        "Action": "Start"
+      }
+    ]
+  }
+]

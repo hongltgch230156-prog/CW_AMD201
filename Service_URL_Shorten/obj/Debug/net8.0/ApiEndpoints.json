@@ -1,0 +1,50 @@
+[
+  {
+    "ContainingType": "Service_URL_Shorten.Controllers.UrlController",
+    "Method": "RedirectToOriginal",
+    "RelativePath": "api/Url/{code}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "code",
+        "Type": "System.String",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "Service_URL_Shorten.Controllers.UrlController",
+    "Method": "GetQrCode",
+    "RelativePath": "api/Url/qr/{shortCode}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "shortCode",
+        "Type": "System.String",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "Service_URL_Shorten.Controllers.UrlController",
+    "Method": "ShortenUrl",
+    "RelativePath": "api/Url/shorten",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "command",
+        "Type": "Service_URL_Shorten.Commands.CreateShortUrlCommand",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  }
+]
