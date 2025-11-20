@@ -90,10 +90,10 @@ jobs:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
       - name: Restore Dependencies
-        run: dotnet restore
+        run: dotnet restore CW_AMD201.sln
 
       - name: Build Gateway
-        run: dotnet build --no-restore Service_API_Gateway # Chỉ build project Gateway
+        run: dotnet build CW_AMD201.sln --no-restore 
 
   # 2. CD PHASE: Build and Push Docker Images
 
