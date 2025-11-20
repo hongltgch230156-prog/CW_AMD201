@@ -45,7 +45,7 @@ jobs:
 
       # Run tests for the CRUD service (assuming tests are located in Service_CRUD/Tests)
       - name: Run Unit Tests (CRUD)
-        run: otnet test Test_Crud/Test_Crud.csproj --no-build --verbosity normal
+        run: dotnet test Test_Crud/Test_Crud.csproj --no-build --verbosity normal
 
   build-and-test-urlshorten:
 
