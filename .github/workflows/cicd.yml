@@ -1,4 +1,4 @@
-name: CI/CD - CW_AMD201
+name: CI/CD - CW_AMD201 
 
 on:
   push:
