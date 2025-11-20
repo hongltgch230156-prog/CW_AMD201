@@ -45,7 +45,7 @@ namespace LoginRegister
             // Firebase Admin SDK
             FirebaseApp.Create(new AppOptions
             {
-                Credential = GoogleCredential.FromFile("Config/projectamd-c2a48-firebase-adminsdk-fbsvc-2051e26122.json")
+                Credential = GoogleCredential.FromFile("Config/firebase.json")
             });
 
             var app = builder.Build();

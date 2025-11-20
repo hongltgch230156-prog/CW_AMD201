@@ -1,8 +1,10 @@
 <script setup>
 import { defineProps, ref } from 'vue';
 import { getQrCodeUrl, deleteUrlById } from '../services/api.js';
-
 import { useAuthStore } from '../stores/auth';
+import { useToast } from "vue-toastification";
+
+const toast = useToast();
 const authStore = useAuthStore();
 
 const props = defineProps({
@@ -19,8 +21,8 @@ const props = defineProps({
 // State để quản lý Modal QR code
 const qrCodeImageUrl = ref(null);
 const showQrModal = ref(false);
-const qrCodeLoading = ref(false); // Thêm state loading
-const qrCodeError = ref(null); // Thêm state error
+const qrCodeLoading = ref(false); 
+const qrCodeError = ref(null); 
 
 // Hàm mở Modal và gọi API lấy QR code
 const openQrModal = async (shortUrl) => {
@@ -32,7 +34,7 @@ const openQrModal = async (shortUrl) => {
   // Trích xuất short code
   const shortCodeMatch = shortUrl.match(/\/api\/url\/([a-zA-Z0-9]+)$/i);
   if (!shortCodeMatch) {
-    qrCodeError.value = 'Không tìm thấy Short Code hợp lệ.';
+    qrCodeError.value = 'No valid Shortcode found';
     qrCodeLoading.value = false;
     return;
   }
@@ -43,8 +45,8 @@ const openQrModal = async (shortUrl) => {
     const imageUrl = await getQrCodeUrl(shortCode);
     qrCodeImageUrl.value = imageUrl;
   } catch (err) {
-    console.error('Lỗi lấy QR code:', err);
-    qrCodeError.value = 'Không thể tạo QR Code. Lỗi kết nối hoặc mã code không hợp lệ.';
+    console.error('Error getting QR code:', err);
+    qrCodeError.value = 'Unable to generate QR Code. Connection error or invalid code.';
   } finally {
     qrCodeLoading.value = false;
   }
@@ -54,10 +56,10 @@ const openQrModal = async (shortUrl) => {
 const copyToClipboard = (text) => {
   // Lưu ý: Sử dụng alert() và confirm() chỉ mang tính chất minh họa đơn giản
   navigator.clipboard.writeText(text).then(() => {
-    alert('Đã sao chép vào clipboard: ' + text);
+    toast.info('Copied to clipboard: ' + text);
   }).catch(err => {
-    console.error('Lỗi sao chép:', err);
-    alert('Không thể sao chép.');
+    console.error('Copy error:', err);
+    toast.error('Cannot be copied. Please try again.');
   });
 };
 
@@ -73,13 +75,13 @@ props.urls.forEach(url => {
 
 const deleteTemporary = (urlItem, index) => {
   props.urls.splice(index, 1);
-  alert('Đã xóa tạm thời khỏi danh sách.');
+  toast.success('Temporarily removed from list');
 };
 
 const deletePermanent = async (urlItem, index) => {
   const shortCodeMatch = urlItem.shortUrl.match(/\/([a-zA-Z0-9]+)$/);
   if (!shortCodeMatch) {
-    alert('Không tìm thấy ShortCode, không thể xóa vĩnh viễn.');
+    toast.error('Invalid Shortcode. Cannot delete.');
     return;
   }
   const shortCode = shortCodeMatch[1];
@@ -88,13 +90,13 @@ const deletePermanent = async (urlItem, index) => {
     const success = await deleteUrlById(shortCode, authStore.idToken);
     if (success) {
       props.urls.splice(index, 1);
-      alert('Đã xóa vĩnh viễn URL.');
+      toast.success('URL permanently removed');
     } else {
-      alert('Xóa thất bại.');
+      toast.error('Failed to delete URL. Please try again.');
     }
   } catch (err) {
     console.error(err);
-    alert('Lỗi khi xóa URL: ' + (err.message || 'Không xác định'));
+    toast.error('Error while deleting URL: ' + (err.message || 'unidentified error'));
   }
 };
 
@@ -106,7 +108,7 @@ const deletePermanent = async (urlItem, index) => {
 
     <!-- Khi chưa có URL -->
     <div v-if="urls.length === 0" class="empty-box">
-      Chưa có URL nào trong danh sách.
+      There are no URLs in the list yet
     </div>
     
     <!-- Danh sách URL -->
@@ -115,7 +117,7 @@ const deletePermanent = async (urlItem, index) => {
       :key="index" 
       class="url-card"
     >
-      <p class="url-original"><strong>URL Gốc:</strong> {{ url.originalUrl }}</p>
+      <p class="url-original"><strong>Original URL:</strong> {{ url.originalUrl }}</p>
       
       <!-- Hiển thị link ngắn -->
       <a 
@@ -135,23 +137,23 @@ const deletePermanent = async (urlItem, index) => {
         <button class="btn-blue" @click="openQrModal(url.shortUrl)">QR</button>
 
         <!-- Nút Xóa/Hiển thị 2 lựa chọn -->
-        <button v-if="props.isLoggedIn" class="btn-red" @click="url.showDeleteOptions = true">Xóa</button>
+        <button v-if="props.isLoggedIn" class="btn-red" @click="url.showDeleteOptions = true">Delete</button>
 
           <!-- Modal Xóa -->
           <div v-if="url.showDeleteOptions" class="modal-overlay">
             <div class="modal-content">
-              <h3 class="modal-title">Xóa URL</h3>
-              <p>Bạn muốn xóa URL này như thế nào?</p>
+              <h3 class="modal-title">Delete URL</h3>
+              <p>How do you want to delete this URL?</p>
               <div style="display:flex;gap:10px;justify-content:center;margin-top:15px;">
-                <button class="btn-orange" @click="deleteTemporary(url, index)">Xóa tạm thời</button>
-                <button class="btn-red" @click="deletePermanent(url, index)">Xóa vĩnh viễn</button>
-                <button class="btn-gray" @click="url.showDeleteOptions = false">Hủy</button>
+                <button class="btn-orange" @click="deleteTemporary(url, index)">Temporary deletion</button>
+                <button class="btn-red" @click="deletePermanent(url, index)">Permanently delete</button>
+                <button class="btn-gray" @click="url.showDeleteOptions = false">Cancel</button>
               </div>
             </div>
           </div>
 
         <!-- Guest vẫn xóa tạm thời ngay -->
-        <button v-if="!props.isLoggedIn" class="btn-red" @click="deleteTemporary(url, index)">Xóa</button>
+        <button v-if="!props.isLoggedIn" class="btn-red" @click="deleteTemporary(url, index)">Delete</button>
       </div>
     </div>
     
@@ -165,11 +167,11 @@ const deletePermanent = async (urlItem, index) => {
         >
           &times;
         </button>
-        <h3 class="modal-title">Mã QR</h3>
+        <h3 class="modal-title">QR code</h3>
         
         <!-- Hiển thị Loading -->
         <div v-if="qrCodeLoading" class="modal-loading"> 
-          Đang tải QR Code...
+          Loading QR Code...
         </div>
         
         <!-- Hiển thị Lỗi -->
@@ -180,11 +182,11 @@ const deletePermanent = async (urlItem, index) => {
         <!-- Hiển thị QR Code thành công -->
         <div v-else-if="qrCodeImageUrl" class="modal-body">
           <img :src="qrCodeImageUrl" alt="QR Code" class="qr-image"/>
-          <p class="qr-note">Quét để truy cập URL gốc</p>
+          <p class="qr-note">Scan to access the original URL</p>
         </div>
         
         <div v-else class="modal-body">
-            Không thể hiển thị QR Code
+            QR Code cannot be displayed
         </div>
 
       </div>

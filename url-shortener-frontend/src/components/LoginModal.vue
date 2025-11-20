@@ -2,6 +2,9 @@
 import { ref } from 'vue';
 import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
 import { useAuthStore } from '../stores/auth';
+import { useToast } from "vue-toastification";
+
+const toast = useToast();
 
 const authStore = useAuthStore();       // Pinia store
 const authFirebase = getAuth();         // Firebase Auth instance
@@ -16,7 +19,7 @@ const localError = ref('');
 const handleLogin = async () => {
   localError.value = '';
   if (!email.value || !password.value) {
-    localError.value = 'Vui lòng điền đầy đủ Email và Mật khẩu.';
+    localError.value = 'Please fill in your Email and Password';
     return;
   }
 
@@ -42,21 +45,21 @@ const handleLogin = async () => {
       uid: user.uid
     });
 
-    alert(`Đăng nhập thành công! Chào mừng, ${authStore.displayName || user.email.split('@')[0]}!`);
+    toast.success(`Login successful! Welcome, ${authStore.displayName || user.email.split('@')[0]}!`);
     emit('close');
 
   } catch (error) {
-    console.error('Lỗi Login:', error);
-    let message = 'Đăng nhập thất bại. Vui lòng kiểm tra lại Email và Mật khẩu.';
+    console.error('Login Error:', error);
+    let message = 'Login failed. Please check your Email and Password again.';
 
     if (error.code && error.code.startsWith('auth/')) {
       if (error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found') {
-        message = 'Email hoặc Mật khẩu không đúng.';
+        message = 'Email or Password is incorrect';
       } else {
-        message = `Lỗi Firebase: ${error.code}`;
+        message = `Firebase error: ${error.code}`;
       }
     } else if (error.response) {
-      message = `Lỗi Backend: ${error.response.data?.Message || error.response.data?.Error || 'Không xác định'}`;
+      message = `Backend error: ${error.response.data?.Message || error.response.data?.Error || 'unidentified'}`;
     }
 
     localError.value = message;
@@ -70,7 +73,7 @@ const handleLogin = async () => {
 <template>
   <div class="modal-overlay">
     <div class="modal-content animate-modal">
-      <h3 class="modal-title">Đăng nhập</h3>
+      <h3 class="modal-title">Login</h3>
 
       <form @submit.prevent="handleLogin" class="modal-form">
         <input
@@ -91,14 +94,14 @@ const handleLogin = async () => {
           :disabled="isLoading"
           class="w-full bg-green-500 text-white font-bold p-3 rounded-lg hover:bg-green-600 transition duration-200 disabled:bg-green-300"
         >
-          <span v-if="isLoading">Đang xử lý...</span>
-          <span v-else>Đăng nhập</span>
+          <span v-if="isLoading">Processing...</span>
+          <span v-else>Login</span>
         </button>
       </form>
 
       <p v-if="localError" class="error-text">{{ localError }}</p>
 
-      <button @click="emit('close')" class="close-btn">Đóng</button>
+      <button @click="emit('close')" class="close-btn">Exit</button>
     </div>
   </div>
 </template>

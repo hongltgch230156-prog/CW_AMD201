@@ -32,7 +32,8 @@ namespace Service_URL_Shorten.Controllers
             var query = new GetOriginalUrlQuery { ShortCode = code };
             var result = await _mediator.Send(query);
             if (result == null) return NotFound("Short URL not found");
-            return Ok(new { result.OriginalUrl });
+            //return Ok(new { result.OriginalUrl });
+            return Redirect(result.OriginalUrl);
 
 
         }

@@ -4,6 +4,9 @@
     import App from './App.vue'
     import axios from 'axios' // Cài đặt: npm install axios
 
+    import Toast from "vue-toastification";
+    import "vue-toastification/dist/index.css";
+
     // Imports Firebase Client SDK
     import { initializeApp } from 'firebase/app';
     import { getAuth } from 'firebase/auth';
@@ -36,5 +39,16 @@
 
     const pinia = createPinia();
     app.use(pinia);
+
+    app.use(Toast, {
+        position: "top-right",
+        timeout: 3000,
+        closeOnClick: true,
+        pauseOnHover: true,
+        hideProgressBar: false,
+        draggable: true,
+        draggablePercent: 0.6,
+    });
+
 
     app.mount('#app');

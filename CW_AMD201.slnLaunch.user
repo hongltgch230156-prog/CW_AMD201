@@ -3,11 +3,11 @@
     "Name": "New Profile",
     "Projects": [
       {
-        "Path": "Service_URL_Shorten\\Service_URL_Shorten.csproj",
+        "Path": "Service_CRUD\\Service_CRUD.csproj",
         "Action": "Start"
       },
       {
-        "Path": "Service_CRUD\\Service_CRUD.csproj",
+        "Path": "Service_URL_Shorten\\Service_URL_Shorten.csproj",
         "Action": "Start"
       },
       {

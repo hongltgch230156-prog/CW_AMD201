@@ -8,7 +8,6 @@
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_HTTP_PORTS=8080
-      - ASPNETCORE_URLS=http://0.0.0.0:8080
 
       - ConnectionStrings__DefaultConnection=Server=db;Database=Service_URL_ShortenDb;User Id=sa;Password=YourPassword123;TrustServerCertificate=True
     depends_on:
@@ -37,7 +36,6 @@
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_HTTP_PORTS=8080
-      - ASPNETCORE_URLS=http://0.0.0.0:8080
       - ConnectionStrings__DefaultConnection=Server=db;Database=Service_URL_ShortenDb;User Id=sa;Password=YourPassword123;TrustServerCertificate=True
     depends_on:
       - db

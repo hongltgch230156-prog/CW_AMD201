@@ -7,6 +7,9 @@ import UrlLookupForm from './components/UrlLookupForm.vue';
 import UrlList from './components/UrlList.vue';
 import LoginModal from './components/LoginModal.vue';       
 import RegisterModal from './components/RegisterModal.vue'; 
+import { useToast } from "vue-toastification";
+
+const toast = useToast();
 
 // Lấy Auth service từ main.js
 const authStore = useAuthStore();
@@ -16,7 +19,7 @@ const auth = getAuth();
 // QUẢN LÝ TRẠNG THÁI XÁC THỰC
 // ------------------------------------------------------------------
 const isLoggedIn = ref(false);
-const userDisplayName = ref('Khách');
+const userDisplayName = ref('Guest');
 const userEmail = ref(null);
 const showLoginModal = ref(false);
 const showRegisterModal = ref(false);
@@ -38,12 +41,12 @@ const handleLogout = async () => {
     try {
         await signOut(auth); 
         isLoggedIn.value = false;
-        userDisplayName.value = 'Khách';
+        userDisplayName.value = 'Guest';
         userEmail.value = null;
-        alert('Đã đăng xuất thành công!');
+        toast.success('Logged out successfully!');
     } catch (error) {
-        console.error('Lỗi khi đăng xuất:', error);
-        alert('Đăng xuất thất bại! Vui lòng thử lại.');
+        console.error('Error when logging out:', error);
+        toast.error('Logout failed! Please try again.');
     }
 }
 
@@ -61,7 +64,7 @@ const updateAuthState = (user) => {
         userEmail.value = user.email;
     } else {
         isLoggedIn.value = false;
-        userDisplayName.value = 'Khách';
+        userDisplayName.value = '';
         userEmail.value = null;
     }
 };
@@ -100,7 +103,6 @@ onMounted(() => {
       </div>
 
       <nav class="navbar-right">
-        <button class="nav-btn">Home</button>
         <button class="nav-btn">About</button>
         <button class="nav-btn" @click="showLoginModal = true">Login</button>
         <button class="nav-btn" @click="showRegisterModal = true">Register</button>
@@ -203,12 +205,29 @@ onMounted(() => {
 
 /* NAVBAR */
 .navbar {
-  background: #42b983;
+  background: linear-gradient(90deg, #42b983, #2f855a);
   color: white;
   padding: 16px 32px;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  border-bottom-left-radius: 12px;
+  border-bottom-right-radius: 12px;
+}
+
+.nav-btn {
+  background: rgba(255,255,255,0.15);
+  color: white;
+  font-size: 16px;       /* chữ to hơn */
+  font-weight: 600;      /* chữ đậm hơn */
+  padding: 10px 18px;    /* to hơn */
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-left: 8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
 }
 
 .nav-btn {
@@ -222,8 +241,26 @@ onMounted(() => {
 }
 
 .nav-btn:hover {
-  background: rgba(255,255,255,0.2);
+  background: rgba(255,255,255,0.35);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
 }
+
+.navbar-left {
+  font-family: 'Inter', 'Roboto', sans-serif;
+  font-size: 18px;
+  font-weight: 600;        /* semi-bold */
+  color: #ffffff;
+  letter-spacing: 0.5px;   /* khoảng cách chữ tinh tế */
+  text-shadow: 0 1px 2px rgba(0,0,0,0.2); /* nhẹ, không lòe loẹt */
+  cursor: default;
+  transition: color 0.2s ease;
+}
+
+.navbar-left:hover {
+  color: #e0f7ef;  /* hover nhẹ thay đổi màu */
+}
+
 
 /* MAIN CONTENT CENTER ALIGN */
 .main-center {
@@ -244,24 +281,38 @@ onMounted(() => {
 }
 
 /* TABS */
+/* TABS NÂNG CẤP CHUYÊN NGHIỆP */
 .tabs {
   display: flex;
   justify-content: center;
-  gap: 14px;
+  gap: 16px;
   margin-bottom: 20px;
 }
 
 .tab {
-  padding: 8px 16px;
-  background: #e5e7eb;
-  border-radius: 8px;
+  padding: 12px 24px;
+  font-size: 16px;
+  font-weight: 600;
+  border-radius: 12px;
   cursor: pointer;
-  transition: 0.25s;
+  transition: all 0.3s ease;
+  background: linear-gradient(135deg, #e0e0e0, #f5f5f5);
+  color: #374151;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+.tab:hover {
+  background: linear-gradient(135deg, #42b983, #2f855a);
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.25);
 }
 
 .active-tab {
-  background: #42b983;
+  background: linear-gradient(135deg, #42b983, #2f855a);
   color: white;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.25);
+  transform: translateY(-1px);
 }
 
 /* TITLE */

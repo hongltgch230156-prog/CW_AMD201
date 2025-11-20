@@ -2,7 +2,7 @@
 import { ref, computed } from 'vue';
 import axios from 'axios';
 import { useAuthStore } from '../stores/auth';
-import { shortenUrl } from '../services/api.js'; // dùng cho auto-shortcode
+import { shortenUrl } from '../services/api.js'; 
 
 const auth = useAuthStore();
 const isLoggedIn = computed(() => auth.isLoggedIn);
@@ -26,17 +26,17 @@ const callShortenUrlApi = async () => {
   errorMessage.value = '';
 
   if (!originalUrl.value) {
-    errorMessage.value = 'Vui lòng nhập URL dài.';
+    errorMessage.value = 'Please enter a long URL.';
     return;
   }
 
   if (!isLoggedIn.value && customShortcode.value) {
-    errorMessage.value = 'Bạn phải đăng nhập để sử dụng custom shortcode.';
+    errorMessage.value = 'You must be logged in to use custom shortcode!';
     return;
   }
 
   if (customShortcode.value && !shortcodeRegex.test(customShortcode.value)) {
-    errorMessage.value = 'Shortcode chỉ gồm chữ + số và tối đa 6 ký tự.';
+    errorMessage.value = 'Shortcode consists of only letters + numbers and maximum 6 characters';
     return;
   }
 
@@ -84,7 +84,7 @@ const callShortenUrlApi = async () => {
   } catch (err) {
     console.error(err);
     errorMessage.value =
-      err.response?.data?.message || 'Không thể rút gọn URL. Vui lòng thử lại.';
+      err.response?.data?.message || 'Unable to shorten URL. Please try again.';
   } finally {
     isLoading.value = false;
   }
@@ -96,18 +96,18 @@ const callShortenUrlApi = async () => {
     <input
       v-model="originalUrl"
       type="url"
-      placeholder="Nhập URL dài..."
+      placeholder="Enter long URL..."
       class="input-field"
       required
     />
 
     <div v-if="isLoggedIn" class="shortcode-box">
-      <label>Shortcode (tối đa 6 ký tự, tùy chọn):</label>
+      <label>Custom Alias(maximum 6 characters):</label>
       <input
         v-model="customShortcode"
         type="text"
         maxlength="6"
-        placeholder="Nhập shortcode (không bắt buộc)"
+        placeholder="Enter Shortcode (optional)"
         class="input-field"
       />
     </div>
@@ -116,8 +116,8 @@ const callShortenUrlApi = async () => {
       type="submit"
       :disabled="isLoading"
       class="main-btn">
-      <span v-if="isLoading">Đang rút gọn...</span>
-      <span v-else>Rút gọn</span>
+      <span v-if="isLoading">Shortening...</span>
+      <span v-else>Shorten</span>
     </button>
 
     <p v-if="errorMessage" class="error-text">{{ errorMessage }}</p>

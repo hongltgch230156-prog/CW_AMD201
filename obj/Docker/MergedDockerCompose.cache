@@ -96,26 +96,12 @@ services:
         protocol: tcp
       - mode: ingress
         target: 8080
-        protocol: tcp
-      - mode: ingress
-        target: 8081
+        published: "8080"
         protocol: tcp
     volumes:
       - type: bind
         source: C:\Users\Admin\AppData\Roaming/Microsoft/UserSecrets
-        target: /home/app/.microsoft/usersecrets
-        read_only: true
-        bind:
-          create_host_path: true
-      - type: bind
-        source: C:\Users\Admin\AppData\Roaming/Microsoft/UserSecrets
         target: /root/.microsoft/usersecrets
-        read_only: true
-        bind:
-          create_host_path: true
-      - type: bind
-        source: C:\Users\Admin\AppData\Roaming/ASP.NET/Https
-        target: /home/app/.aspnet/https
         read_only: true
         bind:
           create_host_path: true
@@ -125,6 +111,23 @@ services:
         read_only: true
         bind:
           create_host_path: true
+  service_url_shortener_frontend:
+    build:
+      context: D:\AMD201\CW_AMD201\url-shortener-frontend
+      dockerfile: Dockerfile
+    container_name: service_url_shortener_frontend
+    environment:
+      VITE_CRUD_URL: http://localhost:8082/api/url
+      VITE_IDENTITY_URL: http://localhost:8081/api/Auth
+      VITE_URL_SHORTEN_URL: http://localhost:8083/api/Url
+    networks:
+      default: null
+    ports:
+      - mode: ingress
+        target: 80
+        published: "8085"
+        protocol: tcp
+    restart: always
 networks:
   default:
     name: dockercompose16672825800874318038_default

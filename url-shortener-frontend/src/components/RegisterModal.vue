@@ -1,5 +1,8 @@
 <script setup>
 import { ref, inject } from 'vue';
+import { useToast } from "vue-toastification";
+
+const toast = useToast();
 
 // Lấy các service đã provide
 const identityApi = inject('identityApi');
@@ -27,7 +30,7 @@ const handleRegister = async () => {
   localError.value = '';
 
   if (!email.value || !password.value || !fullName.value) {
-    localError.value = 'Vui lòng điền đầy đủ Tên, Email và Mật khẩu.';
+    localError.value = 'Please fill in your Name, Email and Password';
     return;
   }
 
@@ -43,15 +46,15 @@ const handleRegister = async () => {
 
     const response = await identityApi.post('/register', payload);
 
-    alert('Đăng ký thành công!');
+    toast.success('Registration successful! You can log in now');
     emit('success');
 
   } catch (error) {
     if (error.response) {
       const backendMessage = error.response.data?.message || error.response.data?.error;
-      localError.value = backendMessage || 'Đăng ký thất bại.';
+      localError.value = backendMessage || 'Registration failed. Please try again.';
     } else {
-      localError.value = 'Lỗi mạng hoặc lỗi không xác định.';
+      localError.value = 'Network error or unknown error';
     }
   } finally {
     isLoading.value = false;
@@ -63,7 +66,7 @@ const handleRegister = async () => {
 <template>
   <div class="modal-overlay">
     <div class="modal-content animate-modal">
-      <h3 class="modal-title">Đăng ký Tài khoản</h3>
+      <h3 class="modal-title">Register an Account</h3>
 
       <form @submit.prevent="handleRegister" class="modal-form">
         <input v-model="fullName" type="text" placeholder="Họ và Tên" required/>
@@ -72,14 +75,14 @@ const handleRegister = async () => {
         <input v-model="dob" type="date" placeholder="Ngày sinh (Tùy chọn)"/>
 
         <button type="submit" :disabled="isLoading">
-          <span v-if="isLoading">Đang đăng ký...</span>
-          <span v-else>Đăng ký</span>
+          <span v-if="isLoading">Registering...</span>
+          <span v-else>Register</span>
         </button>
       </form>
 
       <p v-if="localError" class="error-text">{{ localError }}</p>
 
-      <button @click="emit('close')" class="close-btn">Đóng</button>
+      <button @click="emit('close')" class="close-btn">Exit</button>
     </div>
   </div>
 </template>
