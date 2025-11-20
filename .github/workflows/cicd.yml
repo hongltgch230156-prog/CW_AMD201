@@ -38,11 +38,10 @@ jobs:
 
       # Restore dependencies for the entire solution/project
       - name: Restore Dependencies
-        run: dotnet restore
+        run: dotnet restore CW_AMD201.sln
 
-      # Build the Service and Test project
-      - name: Build Service and Tests
-        run: dotnet build --no-restore
+      - name: Build Solution
+        run: dotnet build CW_AMD201.sln --no-restore
 
       # Run tests for the CRUD service (assuming tests are located in Service_CRUD/Tests)
       - name: Run Unit Tests (CRUD)
@@ -65,10 +64,10 @@ jobs:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
       - name: Restore Dependencies
-        run: dotnet restore
+        run: dotnet restore CW_AMD201.sln
 
-      - name: Build Service
-        run: dotnet build --no-restore
+      - name: Build Solution
+        run: dotnet build CW_AMD201.sln --no-restore
 
       # Run tests for the URL Shorten service
       - name: Run Unit Tests (URL Shorten)
