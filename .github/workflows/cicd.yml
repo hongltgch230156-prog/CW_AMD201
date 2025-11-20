@@ -1,115 +1,92 @@
-# CI/CD Pipeline - CW_AMD201 
+name: CI/CD - CW_AMD201
 
 on:
-
   push:
-
     branches: [ main ]
-
   pull_request:
-
     branches: [ main ]
 
 env:
-
   DOTNET_VERSION: '8.0.x'
-
   DOCKER_REPOSITORY: ${{ secrets.DOCKER_USERNAME }}/cw_amd201
 
 jobs:
-
-  # 1. CI PHASE: Build and Test each service
-
+  # --- 1. CI: CRUD ---
   build-and-test-crud:
-
-    name: Build & Test CRUD Service
-
+    name: Build & Test CRUD
     runs-on: ubuntu-latest
-
     steps:
-
       - name: Checkout Code
         uses: actions/checkout@v4
-
       - name: Setup .NET SDK
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
-
-      # Restore dependencies for the entire solution/project
       - name: Restore Dependencies
         run: dotnet restore CW_AMD201.sln
-
       - name: Build Solution
         run: dotnet build CW_AMD201.sln --no-restore
-
-      # Run tests for the CRUD service (assuming tests are located in Service_CRUD/Tests)
       - name: Run Unit Tests (CRUD)
         run: dotnet test Test_Crud/Test_Crud.csproj --no-build --verbosity normal
 
+  # --- 2. CI: URL SHORTEN ---
   build-and-test-urlshorten:
-
-    name: Build & Test URL Shorten Service
-
+    name: Build & Test URL Shorten
     runs-on: ubuntu-latest
-
     steps:
-
       - name: Checkout Code
         uses: actions/checkout@v4
-
       - name: Setup .NET SDK
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
-
       - name: Restore Dependencies
         run: dotnet restore CW_AMD201.sln
-
       - name: Build Solution
         run: dotnet build CW_AMD201.sln --no-restore
-
-      # Run tests for the URL Shorten service
       - name: Run Unit Tests (URL Shorten)
         run: dotnet test Test_Shorten_Url/Test_Shorten_Url.csproj --no-build --verbosity normal
 
+  # --- 3. CI: API GATEWAY ---
   build-gateway:
-
     name: Build API Gateway
-
     runs-on: ubuntu-latest
-
     steps:
-
       - name: Checkout Code
         uses: actions/checkout@v4
-
       - name: Setup .NET SDK
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
-
       - name: Restore Dependencies
         run: dotnet restore CW_AMD201.sln
-
       - name: Build Gateway
-        run: dotnet build CW_AMD201.sln --no-restore 
+        run: dotnet build CW_AMD201.sln --no-restore
 
-  # 2. CD PHASE: Build and Push Docker Images
-
-  cd-push-docker:
-
-    name: Push Production Images to Docker Hub
-
+  # --- 4. CI: IDENTITY SERVICE ---
+  build-identity:
+    name: Build Identity Service
     runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+      - name: Restore Dependencies
+        run: dotnet restore CW_AMD201.sln
+      - name: Build Identity
+        run: dotnet build CW_AMD201.sln --no-restore
 
-    # CD chỉ chạy khi tất cả các Job CI (build và test) đều thành công
-    needs: [build-and-test-crud, build-and-test-urlshorten, build-gateway] 
-
-    if: github.ref == 'refs/heads/main' # Chỉ chạy CD khi merge vào nhánh 'main'
+  # --- 5. CD PHASE: PUSH DOCKER IMAGES ---
+  cd-push-docker:
+    name: Push Docker Images
+    runs-on: ubuntu-latest
+    needs: [build-and-test-crud, build-and-test-urlshorten, build-gateway, build-identity]
+    if: github.ref == 'refs/heads/main'
 
     steps:
-
       - name: Checkout Code
         uses: actions/checkout@v4
 
@@ -122,32 +99,52 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      # Build và Push Image CRUD
-      - name: Build and Push CRUD Image
+      # 1. Push CRUD
+      - name: Build & Push CRUD
         uses: docker/build-push-action@v5
         with:
-          context: ./Service_CRUD
+          context: ./Service_CRUD  
           push: true
-          tags: ${{ env.DOCKER_REPOSITORY }}:crud-${{ github.sha }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          tags: |
+            ${{ env.DOCKER_REPOSITORY }}:crud-${{ github.sha }}
+            ${{ env.DOCKER_REPOSITORY }}:crud-latest
 
-      # Build và Push Image URL Shorten
-      - name: Build and Push URL Shorten Image
+      # 2. Push URL Shorten
+      - name: Build & Push URL Shorten
         uses: docker/build-push-action@v5
         with:
-          context: ./Service_URL_Shorten
+          context: ./Service_URL_Shorten 
           push: true
-          tags: ${{ env.DOCKER_REPOSITORY }}:urlshorten-${{ github.sha }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          tags: |
+            ${{ env.DOCKER_REPOSITORY }}:urlshorten-${{ github.sha }}
+            ${{ env.DOCKER_REPOSITORY }}:urlshorten-latest
 
-      # Build và Push Image API Gateway
-      - name: Build and Push API Gateway Image
+      # 3. Push Gateway
+      - name: Build & Push Gateway
         uses: docker/build-push-action@v5
         with:
-          context: ./Service_API_Gateway
+          context: ./Service_API_Gateway 
           push: true
-          tags: ${{ env.DOCKER_REPOSITORY }}:gateway-${{ github.sha }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          tags: |
+            ${{ env.DOCKER_REPOSITORY }}:gateway-${{ github.sha }}
+            ${{ env.DOCKER_REPOSITORY }}:gateway-latest
+
+      # 4. Push Identity
+      - name: Build & Push Identity
+        uses: docker/build-push-action@v5
+        with:
+          context: ./Service_Identity 
+          push: true
+          tags: |
+            ${{ env.DOCKER_REPOSITORY }}:identity-${{ github.sha }}
+            ${{ env.DOCKER_REPOSITORY }}:identity-latest
+
+      # 5. Push Frontend
+      - name: Build & Push Frontend
+        uses: docker/build-push-action@v5
+        with:
+          context: ./url-shortener-frontend 
+          push: true
+          tags: |
+            ${{ env.DOCKER_REPOSITORY }}:urlshorten-frontend-${{ github.sha }}
+            ${{ env.DOCKER_REPOSITORY }}:urlshorten-frontend-latest
