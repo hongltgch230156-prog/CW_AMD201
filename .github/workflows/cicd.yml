@@ -4,11 +4,11 @@ on:
 
   push:
 
-    branches: [ master ]
+    branches: [ main ]
 
   pull_request:
 
-    branches: [ mastermaster ]
+    branches: [ main ]
 
 env:
 
@@ -45,9 +45,8 @@ jobs:
         run: dotnet build --no-restore
 
       # Run tests for the CRUD service (assuming tests are located in Service_CRUD/Tests)
-      #- name: Run Unit Tests (CRUD)
-        # Thay thế Service_CRUD/Service_CRUD.csproj bằng đường dẫn tới file Test Project của bạn
-        #run: dotnet test Service_CRUD --no-build --verbosity normal || true
+      - name: Run Unit Tests (CRUD)
+        run: otnet test Test_Crud/Test_Crud.csproj --no-build --verbosity normal
 
   build-and-test-urlshorten:
 
@@ -72,9 +71,8 @@ jobs:
         run: dotnet build --no-restore
 
       # Run tests for the URL Shorten service
-      #- name: Run Unit Tests (URL Shorten)
-        # Thay thế Service_URL_Shorten/Service_URL_Shorten.csproj bằng đường dẫn tới file Test Project của bạn
-        #run: dotnet test Service_URL_Shorten --no-build --verbosity normal || true
+      - name: Run Unit Tests (URL Shorten)
+        run: dotnet test Test_Shorten_Url/Test_Shorten_Url.csproj --no-build --verbosity normal
 
   build-gateway:
 
